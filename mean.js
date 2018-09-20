@@ -30,6 +30,6 @@ class Mean{
     }
 
     newPos() {
-		this.pos = createVector(this.x_sum / amount, this.y_sum / amount)
+		this.pos = createVector(this.x_sum / this.amount, this.y_sum / this.amount)
     }
 }

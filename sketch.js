@@ -2,7 +2,7 @@ let points = []
 let means = []
 let k = 3
 let r = 15
-let autoMean = true
+let autoMean
 
 
 function setup() {
@@ -10,8 +10,10 @@ function setup() {
 
 	// Create means
 	let commonColor = random(360)
+	console.log(commonColor)
 	for (let i = 0; i < k; i++) {
-		let c = round((commonColor + (360 * i / k) % 360))
+		let c = round((commonColor + (360 * i / k))) % 360
+		console.log(c)
 		let pos = createVector(random(width), random(height))
 		means.push(new Mean(pos, color('hsb(' + c + ', 100%, 80%)')))
 	}
@@ -19,12 +21,12 @@ function setup() {
 	// Create points and assign to closest mean
 	for (let i = 0; i < 100; i++) {
 		let p = createVector(random(r * 0.7, width - r * 0.7), random(r * 0.7, height - r * 0.7))
-
-		points.push([p, closestMean(p)])
+		let assignedMean = closestMean(p)
+		points.push([p, assignedMean])
 		assignedMean.givePoint(points[i])
 	}
 
-	console.log(points)
+	autoMean = createCheckbox('Auto find means', true)
 }
 
 function draw() {
@@ -35,7 +37,7 @@ function draw() {
 	points.forEach(p => {
 		let newMean = closestMean(p[0])
 		let oldMean = p[1]
-		if( newMean !== oldMean) {
+		if (newMean !== oldMean) {
 			oldMean.removePoint(p)
 			newMean.givePoint(p)
 		}
@@ -51,7 +53,7 @@ function draw() {
 		ellipse(mean.pos.x, mean.pos.y, r)
 	})
 
-	// if (autoMean) newMeans()
+	if (autoMean) newMeans()
 
 }
 
@@ -71,7 +73,10 @@ function keyPressed() {
 
 
 function mouseDragged() {
-	points.push(createVector(mouseX, mouseY))
+	let p = createVector(mouseX, mouseY)
+	let assignedMean = closestMean(p)
+	points.push([p, assignedMean])
+	assignedMean.givePoint(points[points.length - 1])
 }
 
 function newMeans() {
