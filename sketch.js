@@ -2,7 +2,7 @@ let points = []
 let means = []
 let k = 3
 let r = 15
-let autoMean
+let auto
 
 
 function setup() {
@@ -26,7 +26,7 @@ function setup() {
 		assignedMean.givePoint(points[i])
 	}
 
-	autoMean = createCheckbox('Auto find means', true)
+	auto = createCheckbox('Auto find means', false)
 }
 
 function draw() {
@@ -53,22 +53,22 @@ function draw() {
 		ellipse(mean.pos.x, mean.pos.y, r)
 	})
 
-	if (autoMean) newMeans()
+	if (auto.checked()) newMeans()
 
 }
 
 function keyPressed() {
 	if (key == ' ') newMeans()
-	else if (key == 'a') {
-		switch (autoMean) {
+/* 	else if (key == 'a') {
+		switch (auto.checked()) {
 			case true:
-				autoMean = false
+				auto.checked() = false
 				break
 			case false:
-				autoMean = true
+				auto.checked() = true
 				break
 		}
-	}
+	} */
 }
 
 
