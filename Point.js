@@ -1,5 +1,5 @@
 class Point {
-    constructor (x, y) {
+    constructor(x, y) {
         this.x = x
         this.y = y
         this.mean = null
@@ -8,8 +8,9 @@ class Point {
     static create(amount) {
         let array = []
 
-        for(let i = 0; i < amount; i++){
+        for (let i = 0; i < amount; i++) {
             array.push(new Point(random(width), random(height)))
+            closestMean(array[i]).givePoint(array[i])
         }
         return array
     }
@@ -19,11 +20,7 @@ class Mean {
     constructor(x, y) {
         this.x = x
         this.y = y
-        this.color = color(
-            'hsb(' +
-            round((80 + (360 * i / amount))) % 360 +
-             ', 100%, 80%)'
-        )
+        this.color
         this.x_sum = 0
         this.y_sum = 0
         this.amount = 0
@@ -36,7 +33,12 @@ class Mean {
             let randomPoint = dataPoints[Math.floor(random(dataPoints.length))]
             let x = randomPoint.x
             let y = randomPoint.y
-            means.push(new Mean(x, y))
+            array.push(new Mean(x, y))
+            array[i].color = color(
+                'hsb(' +
+                round((80 + (360 * i / amount))) % 360 +
+                ', 100%, 80%)'
+            )
         }
         return array
     }
@@ -46,9 +48,9 @@ class Mean {
      and adds its position to this means sums 
     */
     givePoint(p) {
-        p[1] = this
+        p.mean = this
         this.x_sum += p.x
-        this.y_sum += p[0].y
+        this.y_sum += p.y
         this.amount++
     }
 
@@ -57,16 +59,17 @@ class Mean {
      and subtracts its position from this means sums 
     */
     removePoint(p) {
-        p[1] = null
-        this.x_sum -= p[0].x
-        this.y_sum -= p[0].y
+        p.mean = null
+        this.x_sum -= p.x
+        this.y_sum -= p.y
         this.amount--
     }
 
     newPos() {
         console.log(this.color)
         if (this.amount > 0) {
-            this.pos = createVector(this.x_sum / this.amount, this.y_sum / this.amount)
+            this.x = this.x_sum / this.amount
+            this.y = this.y_sum / this.amount
         }
     }
 }
