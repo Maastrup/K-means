@@ -1,95 +1,124 @@
 let points = []
 let means = []
-let k = 3
-let r = 15
-let autoMean = true
-
+let amount = 100
+const r = 15
+let auto
 
 function setup() {
-	createCanvas(650, 400)
+	createCanvas(650, 500)
 
-	// Create means
-	let commonColor = random(360)
-	for (let i = 0; i < k; i++) {
-		let c = round((commonColor + (360 * i / k) % 360))
-		let pos = createVector(random(width), random(height))
-		means.push(new Mean(pos, color('hsb(' + c + ', 100%, 80%)')))
+	points = [
+		new Point(152, height - 72),
+		new Point(102, height - 56),
+		new Point(182, height - 60),
+		new Point(192, height - 68),
+		new Point(122, height - 72),
+		new Point(142, height - 77)
+	]
+
+	means = Mean.create(3, points)
+
+	for(let p of points) {
+		closestMean(p).givePoint(p)
 	}
 
-	// Create points and assign to closest mean
-	for (let i = 0; i < 100; i++) {
-		let p = createVector(random(r * 0.7, width - r * 0.7), random(r * 0.7, height - r * 0.7))
+	auto = createCheckbox('Auto find gennemsnit', false)
 
-		points.push([p, closestMean(p)])
-		assignedMean.givePoint(points[i])
-	}
+	// 
+	let inp = createInput(100)
+	inp.input( () => {
+		amount = Number(inp.value())
+	})
 
-	console.log(points)
+	createButton('Tilfældige punkter').mousePressed( () => {
+		clearCanvas()
+		points = Point.create(amount)
+	})
+
+	createButton('Rens lærred').mousePressed(clearCanvas)
+
 }
 
 function draw() {
 	background(30)
 
+	for (let p of points) {
+		stroke(255, 75)
+		line(p.x, p.y, p.mean.x, p.mean.y)
+	}
+
 	// Draw points and assign the closest mean by euclidean distance
-	noStroke()
+	// noStroke()
 	points.forEach(p => {
-		let newMean = closestMean(p[0])
-		let oldMean = p[1]
-		if( newMean !== oldMean) {
+		const newMean = closestMean(p)
+		const oldMean = p.mean
+		if (newMean !== oldMean) {
 			oldMean.removePoint(p)
 			newMean.givePoint(p)
 		}
-		fill(p[1].color)
-		ellipse(p[0].x, p[0].y, r)
+		noStroke()
+		fill(p.mean.color)
+		ellipse(p.x, p.y, r)
 	})
 
 	// Draw means
 	stroke(255)
 	strokeWeight(2)
-	means.forEach(mean => {
+	for (let mean of means) {
 		fill(mean.color)
-		ellipse(mean.pos.x, mean.pos.y, r)
-	})
+		ellipse(mean.x, mean.y, r)
+	}
 
-	// if (autoMean) newMeans()
+	if (auto.checked()) newMeans()
 
 }
 
 function keyPressed() {
 	if (key == ' ') newMeans()
-	else if (key == 'a') {
-		switch (autoMean) {
-			case true:
-				autoMean = false
-				break
-			case false:
-				autoMean = true
-				break
-		}
-	}
 }
 
 
 function mouseDragged() {
-	points.push(createVector(mouseX, mouseY))
+	addPoint(mouseX, mouseY)
+}
+
+function mousePressed() {
+	addPoint(mouseX, mouseY)
+}
+
+function addPoint(x, y) {
+	if (0 < x && x < width && 0 < y && y < height) {
+		let newPoint = new Point(x, y)
+		points.push(newPoint)
+		closestMean(newPoint).givePoint(newPoint)
+	}
 }
 
 function newMeans() {
-	means.forEach(mean => {
+	for (let mean of means) {
 		mean.newPos()
-	})
+	}
 }
 
-function closestMean(vector) {
+function closestMean(position) {
 	let assignedMean
 	let leastDist
 
 	means.forEach(mean => {
-		let d = vector.dist(mean.pos)
+		let d = dist(mean.x, mean.y, position.x, position.y)
 		if (d < leastDist || leastDist === undefined) {
 			leastDist = d
 			assignedMean = mean
 		}
 	})
 	return assignedMean
+}
+
+function clearCanvas() {
+	points = []
+	for(let mean of means){
+		mean.x_sum = 0
+		mean.y_sum = 0
+		mean.amount = 0
+	}
 }
